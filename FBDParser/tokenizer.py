@@ -140,7 +140,7 @@ class Tokenizer:
     def parse_char(self, state, char):
         if state == 'text' and '\ue000' <= char <= '\ue814':
             self.new_object()
-            self.stack.append(('text@complement', char))
+            self.stack.append(('text@symbolA', char))
         else:
             self.current += char
 
