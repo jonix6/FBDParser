@@ -51,3 +51,38 @@ class EntityPatterns:
             name = match_any.lastgroup
             m = re.fullmatch(entities[name], cmd, re.X)
             return m and (name, m.groupdict())
+
+
+class FBDSyntaxError(Exception):
+    pass
+
+
+def get_form(c):
+    if c == '(':
+        return 'prefix'
+    elif c == ')':
+        return 'suffix'
+    return 'infix'
+
+
+def parse_command(cmd):
+    if len(cmd) >= 2 and 'A' <= cmd[0] <= 'Z' and 'A' <= cmd[1] <= 'Z':
+        name, c = cmd[:2], cmd[2:]
+        form = c and get_form(c[0]) or 'infix'
+        c = c[form != 'infix':]
+        has_pattern = CommandPatterns.get(name, form)
+        if not has_pattern and form != 'suffix':
+            raise FBDSyntaxError(f'invalid command: {cmd}')
+        if not has_pattern:
+            return name, form, {}
+        args = CommandPatterns.match(name, form, c)
+        if args is None:
+            raise FBDSyntaxError(f'command argument error: {cmd}')
+        return name, form, args
+
+
+def parse_entity(cmd):
+    token = EntityPatterns.match(cmd)
+    if not token:
+        raise FBDSyntaxError(f'entity argument error: {cmd}')
+    return token
