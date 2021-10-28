@@ -61,7 +61,7 @@ class Lexer:
         elif char == '~' and TILDE_AS_HYPHEN:
             cate1, cate2 = 'operator', 'hyphen'
         elif '\ue000' <= char <= '\ue814':
-            cate2 = 'complement'
+            cate2 = 'symbolA'
         elif char < ' ':
             cate1 = 'control'
         return cate1, cate2, char
@@ -72,7 +72,7 @@ class Lexer:
         d = self.readbyte(fp, 1)
         if d == b'\x0f' and len(b) == len(c) == 2:
             if b == b'\xfe\x01':
-                return 'plain', 'complement', c.decode('gb18030')
+                return 'plain', 'symbolB', c.decode('gb18030')
             elif b[0] == 0xff:
                 return 'plain', 'text', bytearray([b[1]-1, 48+c[1]//16, c[0], 48+c[1]%16-1]).decode('gb18030')
         fp.seek(-len(b + c + d), 1)
