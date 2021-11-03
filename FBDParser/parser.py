@@ -1,6 +1,7 @@
 
 from .tokenizer import Tokenizer
 from .patterns import parse_command, parse_entity
+from .exceptions import FBDEOF
 
 # full width -> ascii
 trans = dict(zip(range(0xff01, 0xff5f), range(0x21, 0x7f)))
@@ -9,10 +10,6 @@ trans.update({0xe010: 0x2e, 0xe011: 0x2d, 0xe012: 0x2a})  # ".", "-", "*"
 
 def normalize(s):
     return s.translate(trans)
-
-
-class FBDEOF(Exception):
-    pass
 
 
 class Parser:

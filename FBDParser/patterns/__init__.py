@@ -21,6 +21,7 @@ from ._textstyles import TextPatterns
 from ._whitespaces import WhitespacePatterns
 
 from ._entities import entities, entity
+from ..exceptions import FBDCommandError, FBDEntityError
 
 import re
 
@@ -53,10 +54,6 @@ class EntityPatterns:
             return m and (name, m.groupdict())
 
 
-class FBDSyntaxError(Exception):
-    pass
-
-
 def get_form(c):
     if c == '(':
         return 'prefix'
@@ -72,17 +69,17 @@ def parse_command(cmd):
         c = c[form != 'infix':]
         has_pattern = CommandPatterns.get(name, form)
         if not has_pattern and form != 'suffix':
-            raise FBDSyntaxError(f'invalid command: {cmd}')
+            raise FBDCommandError(f'invalid command: {cmd}')
         if not has_pattern:
             return name, form, {}
         args = CommandPatterns.match(name, form, c)
         if args is None:
-            raise FBDSyntaxError(f'command argument error: {cmd}')
+            raise FBDCommandError(f'command argument error: {cmd}')
         return name, form, args
 
 
 def parse_entity(cmd):
     token = EntityPatterns.match(cmd)
     if not token:
-        raise FBDSyntaxError(f'entity argument error: {cmd}')
+        raise FBDEntityError(f'entity argument error: {cmd}')
     return token
