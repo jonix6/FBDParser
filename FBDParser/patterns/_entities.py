@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 
-from ._global import _r, bisize, fontname
+from ._global import _f
 
 "================================== 盘外符 ====================================="
 
@@ -14,7 +15,7 @@ entities['xstack'] = r'''Y(?P<zf>\S\S)  # 附加单字符
     (?P<jz>Z)?  # 表示附加字符排在主字符的左边
     (?P<gd>[GDU])?  # 高低位置
 '''
-entities['supsub'] = rf'''J(?P<zz>\S)  # 附加多字符
+entities['supsub'] = _f(r'''J(?P<zz>\S)  # 附加多字符
     (?:
         (?P<sz>\S{{1,3}})  # 上角字符
         (?P<sg>[GDU])?  # 上角高低位置
@@ -25,13 +26,13 @@ entities['supsub'] = rf'''J(?P<zz>\S)  # 附加多字符
     )?
     (?:,
         (?:
-        WT(?P<wh>{_r(bisize)})  # 外文字号
-            (?P<wz>{_r(fontname)})  # 外文字体
-        |HT(?P<hh>{_r(bisize)})  # 外文字号
-            (?P<hz>{_r(fontname)})  # 外文字体
+        WT(?P<wh>{_r[bisize]})  # 外文字号
+            (?P<wz>{_r[fontname]})  # 外文字体
+        |HT(?P<hh>{_r[bisize]})  # 外文字号
+            (?P<hz>{_r[fontname]})  # 外文字体
         )
     )?
-'''
+''')
 entities['gb748'] = r'N?(?P<nm>[0-9A-F]{4})'  # 748编码盘外符
 entities['gbk'] = r'G(?P<nm>[0-9A-F]{4})'  # GBK编码盘外符
 entities['num_c'] = r'B(?P<sz>\d{2,3})'  # 阳圈码
@@ -53,4 +54,5 @@ entities['znum_s_s'] = r'FHZ(?P<dx>\#)?(?P<sz>\d{1,3})'  # 立体中文方框码
 entities['frac_d'] = r'(?P<fz>\d)/(?P<fm>\d\d?)'  # 斜分数
 entities['frac_v'] = r'(?P<fz>\d)-(?P<fm>\d)'  # 正分数
 
-entity = '|'.join(rf'(?P<{k}>{_r(v)})' for k, v in entities.items())
+entity = '|'.join(_f(r'(?P<{k}>{_r[v]})', k=k, v=v)
+                  for k, v in entities.items())

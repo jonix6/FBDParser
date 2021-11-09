@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 import codecs
 from io import BytesIO
@@ -5,35 +6,36 @@ from io import BytesIO
 TILDE_AS_HYPHEN = False
 
 enclosing = {
-    '〖': ('open', 'command'), 
-    '〗': ('close', 'command'), 
-    '\ue000': ('open', 'entity'), 
-    '\ue002': ('close', 'entity')
+    u'〖': ('open', 'command'),
+    u'〗': ('close', 'command'),
+    u'\ue000': ('open', 'entity'),
+    u'\ue002': ('close', 'entity')
 }
 
 operators = {
-    '\ue001': 'escape', 
-    '\ue003': 'return', 
-    '\ue004': 'linefeed', 
-    '\ue005': 'endfeed', 
-    '\ue006': 'math_sign', 
-    '\ue007': 'page_num', 
-    '\ue008': 'run_open', 
-    '\ue009': 'run_close',   
-    '\ue00a': 'font_switch', 
-    '\ue00b': 'superscript', 
-    '\ue00c': 'subscript', 
-    '\ue5e6': 'nbsp', 
-    '\ue5e7': 'ensp', 
-    '\ue5e8': 'thinsp', 
-    '\ue5e9': 'verythinsp'
+    u'\ue001': 'escape',
+    u'\ue003': 'return',
+    u'\ue004': 'linefeed',
+    u'\ue005': 'endfeed',
+    u'\ue006': 'math_sign',
+    u'\ue007': 'page_num',
+    u'\ue008': 'run_open',
+    u'\ue009': 'run_close',
+    u'\ue00a': 'font_switch',
+    u'\ue00b': 'superscript',
+    u'\ue00c': 'subscript',
+    u'\ue5e6': 'nbsp',
+    u'\ue5e7': 'ensp',
+    u'\ue5e8': 'thinsp',
+    u'\ue5e9': 'verythinsp'
 }
 
 ascii_operators = {
-    '[': ('open', 'command'), 
-    ']': ('close', 'command'), 
+    '[': ('open', 'command'),
+    ']': ('close', 'command'),
     '\\': ('operator', 'pattern')
 }
+
 
 class Lexer:
     def __init__(self, strict=False, apply_ascii_operator=True):
@@ -60,7 +62,7 @@ class Lexer:
             cate1, cate2 = ascii_operators[char]
         elif char == '~' and TILDE_AS_HYPHEN:
             cate1, cate2 = 'operator', 'hyphen'
-        elif '\ue000' <= char <= '\ue814':
+        elif u'\ue000' <= char <= u'\ue814':
             cate2 = 'symbolA'
         elif char < ' ':
             cate1 = 'control'
@@ -74,7 +76,7 @@ class Lexer:
             if b == b'\xfe\x01':
                 return 'plain', 'symbolB', c.decode('gb18030')
             elif b[0] == 0xff:
-                return 'plain', 'text', bytearray([b[1]-1, 48+c[1]//16, c[0], 48+c[1]%16-1]).decode('gb18030')
+                return 'plain', 'text', bytearray([b[1]-1, 48+c[1]//16, c[0], 48+c[1] % 16-1]).decode('gb18030')
         fp.seek(-len(b + c + d), 1)
 
     def parse_symbol(self, fp, n):
@@ -85,9 +87,9 @@ class Lexer:
         fp.seek(-len(fontname + x), 1)
 
     def lex(self, fp):
-        try:
-            token = None
-            while True:
+        token = None
+        while 1:
+            try:
                 c = fp.read(1)
                 if not c:
                     break
@@ -104,27 +106,27 @@ class Lexer:
                 if token:
                     yield token
                     token = None
-        except UnicodeError as e:
-            if self.strict:
-                raise e
-            fp.seek(fp.tell() + 1, 1)
-            yield from self.lex(fp)
+            except UnicodeError as e:
+                if self.strict:
+                    raise e
+                fp.seek(1-len(e.args[1]), 1)
 
-    def fromfile(self, filename):
-        fp = codecs.open(filename, 'r', encoding='gb18030')
+    def fromstream(self, fp):
         try:
-            yield from self.lex(fp)
+            for token in self.lex(fp):
+                yield token
         finally:
             fp.close()
+
+    def fromfile(self, filename):
+        return self.fromstream(codecs.open(filename, 'r', encoding='gb18030'))
 
     def frombytes(self, data):
         info = codecs.lookup('gb18030')
-        fp = codecs.StreamReaderWriter(BytesIO(data), info.streamreader, info.streamwriter)
-        try:
-            yield from self.lex(fp)
-        finally:
-            fp.close()
-            
+        fp = codecs.StreamReaderWriter(
+            BytesIO(data), info.streamreader, info.streamwriter)
+        return self.fromstream(fp)
+
     def fromstring(self, text):
         for c in text:
             yield self.parse_char(c)

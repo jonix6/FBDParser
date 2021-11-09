@@ -23,8 +23,8 @@ from ._whitespaces import WhitespacePatterns
 from ._entities import entities, entity
 from ..exceptions import FBDCommandError, FBDEntityError
 
-import re
-
+import re, sys
+_py2 = sys.version_info < (3, 0)
 
 class CommandPatterns(
         ChemicalPatterns, ColumnPatterns, DrawingPatterns, FormulaPatterns,
@@ -35,22 +35,30 @@ class CommandPatterns(
 
     @classmethod
     def get(self, name, form):
-        return hasattr(self, f'{name}_{form}')
+        return hasattr(self, name + '_' + form)
+
+    @classmethod
+    def pattern(self, name, form):
+        if self.get(name, form):
+            pat = getattr(self, name + '_' + form)
+            if _py2:
+                pat = pat.decode('utf-8')
+            return re.compile(r'\A(?:' + pat + r')\Z', re.X)
 
     @classmethod
     def match(self, name, form, cmd):
-        if self.get(name, form):
-            m = re.fullmatch(getattr(self, f'{name}_{form}'), cmd, re.X)
-            return m and m.groupdict()
+        pat = self.pattern(name, form)
+        m = pat and pat.match(cmd)
+        return m and m.groupdict()
 
 
 class EntityPatterns:
     @staticmethod
     def match(cmd):
-        match_any = re.fullmatch(entity, cmd, re.X)
+        match_any = re.match(r'\A(?:' + entity + r')\Z', cmd, re.X)
         if match_any:
             name = match_any.lastgroup
-            m = re.fullmatch(entities[name], cmd, re.X)
+            m = re.match(r'\A(?:' + entities[name] + r')\Z', cmd, re.X)
             return m and (name, m.groupdict())
 
 
@@ -69,17 +77,18 @@ def parse_command(cmd):
         c = c[form != 'infix':]
         has_pattern = CommandPatterns.get(name, form)
         if not has_pattern and form != 'suffix':
-            raise FBDCommandError(f'invalid command: {cmd}')
+            raise FBDCommandError('invalid command: ' + cmd)
         if not has_pattern:
             return name, form, {}
         args = CommandPatterns.match(name, form, c)
         if args is None:
-            raise FBDCommandError(f'command argument error: {cmd}')
+            print(name, form, c, CommandPatterns.pattern(name, form).pattern)
+            raise FBDCommandError('command argument error: ' + cmd)
         return name, form, args
 
 
 def parse_entity(cmd):
     token = EntityPatterns.match(cmd)
     if not token:
-        raise FBDEntityError(f'entity argument error: {cmd}')
+        raise FBDEntityError('entity argument error: ' + cmd)
     return token

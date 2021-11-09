@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 
-from ._global import _r, length, fontset, fontname, color, lines, size
+from ._global import _f
 from ._frames import FramePatterns
 
 "=======================================边文背景类========================================"
@@ -35,17 +36,16 @@ class WhitespacePatterns:
     AM_infix = BM_infix = WM_infix = ''
 
     # 背景注解（BJ）
-    BJ_prefix = rf'''
-        (?P<zj>-?{_r(length)})?,  # 左边距
-        (?P<sj>-?{_r(length)})?,  # 上边距
-        (?P<yj>-?{_r(length)})?,  # 右边距
-        (?P<xj>-?{_r(length)})?  # 下边距
+    BJ_prefix = _f(r'''
+        (?P<zj>-?{_r[length]})?,  # 左边距
+        (?P<sj>-?{_r[length]})?,  # 上边距
+        (?P<yj>-?{_r[length]})?,  # 右边距
+        (?P<xj>-?{_r[length]})?  # 下边距
         (?P<fp>\#)?  # 排法与正文排法相反
-    '''
-
+    ''')
 
     # 边文注解（BW）
-    BW_prefix = rf'''(?:  # 初用参数
+    BW_prefix = _f(r'''(?:  # 初用参数
         (?P<py>  # 边文排在哪些页，缺省表示后续各页均排边文
             B|  # 边文只排在本页
             D|  # 边文排在后续各单页
@@ -53,27 +53,27 @@ class WhitespacePatterns:
         )?
         (?:\(
             (?P<wz>[SXZY])?  # 边文位于版心的上/下/左/右面，缺省为上
-            (?P<bj>-?{_r(length)})?  # 边文与版心之间的距离，缺省为一五号字
-            ,(?P<sj>-?{_r(length)})?  # 左/上边距，缺省均为0
-            ,(?P<zj>-?{_r(length)})?  # 右/下边距，缺省均为0
+            (?P<bj>-?{_r[length]})?  # 边文与版心之间的距离，缺省为一五号字
+            ,(?P<sj>-?{_r[length]})?  # 左/上边距，缺省均为0
+            ,(?P<zj>-?{_r[length]})?  # 右/下边距，缺省均为0
         \))?
-        (?:G(?P<gd>{_r(length)}\#?))?  # 边文高
+        (?:G(?P<gd>{_r[length]}\#?))?  # 边文高
         (?:M(?P<qs>\d*)  # 页码的起始页号
             (?:  # 页码型号
                 {page_number}|  # 单字页码
                 D  # 多字页码
                     (?P<dz>Z)?  # 使用中文数字页码
-                    (?P<mk>{_r(length)})?   # 多字页码宽度
+                    (?P<mk>{_r[length]})?   # 多字页码宽度
                     (?P<mq>[ZY]Q)?\#?  # 多字页码左/右对齐排
             )
         )?
         |  # 继承参数
         X(?P<ds>[DS])?  # 继承前面单/双页边文参数，缺省为各页边文
         (?P<jw>[SXZY])?  # 继承位于页面哪个位置的边文，缺省为上
-    )?'''
+    )?''', page_number=page_number)
 
     # 书眉说明注解（MS）
-    MS_infix = rf'''
+    MS_infix = _f(r'''
         (?P<tp>%)?  # 在蒙文排版中，要同时排竖排词条和横排词条
         (?P<px>X)?  # 表示书眉在下，缺省本参数表示书眉在上
         (?:C(?P<ct>  # 词条在书眉上的格式
@@ -84,21 +84,21 @@ class WhitespacePatterns:
             DS,SM|  # 单页排首词条，双页排末词条
             M)  # 单、双页都排末词条
         )?
-        (?:J(?P<qk>{_r(length)}))?  # 词条切口距离
+        (?:J(?P<qk>{_r[length]}))?  # 词条切口距离
         {fontset}  # 字号、字体
         (?P<pl>,L)?  # 书眉排在里口
         (?P<pw>,W)?  # 书眉排在外口
         (?:,(?P<mx>{running_head}))?  # 书眉线
-        (?:(?P<ys>{_r(color)})Z)?  # 字颜色
-        (?:(?P<xs>{_r(color)})X)?  # 线颜色
-        (?:。(?P<xj>{_r(length)}))?  # 书眉与眉线之间的距离
-        (?:,(?P<wj>{_r(length)}))?  # 眉线与正文之间的距离
+        (?:(?P<ys>{_r[color]})Z)?  # 字颜色
+        (?:(?P<xs>{_r[color]})X)?  # 线颜色
+        (?:。(?P<xj>{_r[length]}))?  # 书眉与眉线之间的距离
+        (?:,(?P<wj>{_r[length]}))?  # 眉线与正文之间的距离
         (?:  # 书眉线调整
-            (?:;L(?P<nk>-?{_r(length)}))?  # 书眉线内扩
-            (?:;W(?P<wk>-?{_r(length)})!?)?  # 书眉线外扩
-            |(?:;K(?P<xk>{_r(length)}))?  # 书眉线宽度
+            (?:;L(?P<nk>-?{_r[length]}))?  # 书眉线内扩
+            (?:;W(?P<wk>-?{_r[length]})!?)?  # 书眉线外扩
+            |(?:;K(?P<xk>{_r[length]}))?  # 书眉线宽度
         )?
-    '''
+    ''', running_head=running_head)
 
     # 单眉注解（DM）
     # 眉眉注解（MM）
@@ -106,13 +106,13 @@ class WhitespacePatterns:
     DM_prefix = MM_prefix = SM_prefix = r'(?P<lw>[LW])?'  # 书眉排在里/外口
 
     # 空眉注解（KM）
-    KM_infix = rf'''
+    KM_infix = _f(r'''
         (?P<mx>{running_head})?  # 书眉线
         (?P<tk>T)?  # 能同时控制书眉、词条、边文显示
-    '''
+    ''', running_head=running_head)
 
     # 背景隐藏注解（BY）
-    BY_infix = rf'''
+    BY_infix = _f(r'''
         (?P<jy>J)?  # 本页的背景内容隐藏
         (?P<wy>W)?  # 本页的边文内容隐藏
         (?P<yy>YW?)?  # 本页的页码内容隐藏。参数〔W〕表示本页页码不占页号，不显示
@@ -123,17 +123,17 @@ class WhitespacePatterns:
             (?P<nf>(?:《.+?》)*)  )?  # 需要隐藏的页号标识符
         (?:(?P<qy>Q)  # 本页的多页分区内容隐藏
             (?P<qf>(?:《.+?》)*)  )?  # 需要隐藏的多页分区名称
-    '''
+    ''', running_head=running_head)
 
     # 词条注解（CT）
     CT_prefix = r'(?P<yt>\#)?'  # 词条为隐词条，不出现在正文
-    CT_infix = rf'''{CT_prefix}
+    CT_infix = _f(r'''{CT_prefix}
         (?P<kc>!)?  # 词条将被无条件添加到入到书眉中无论上一个词条是否与本词条相同
-        (?:K(?P<kg>{_r(length)}))?  # 后加设置的空格字距
-    '''
+        (?:K(?P<kg>{_r[length]}))?  # 后加设置的空格字距
+    ''', CT_prefix=CT_prefix)
 
     # 多页分区注解（MQ）
-    MQ_prefix = rf'''
+    MQ_prefix = _f(r'''
         (?:《(?P<qm>.+?)》)  # 分区名
         (?:
             (?P<cj>  # 分区所在层级
@@ -152,7 +152,7 @@ class WhitespacePatterns:
             (?P<sp>F)?  # 分区中的文字从右到左竖排
             (?P<dz>%)?  # 分区不在版心中挖空
         )?
-    '''
+    ''', FramePatterns=FramePatterns)
     MQ_infix = r'''
         (?:《(?P<qm>.+?)》)  # 分区名
         (?P<kg>[JH])  # 禁止/激活多页分区
@@ -161,18 +161,18 @@ class WhitespacePatterns:
     '''
 
     # 页码注解（YM）
-    YM_infix = YM_prefix = rf'''
+    YM_infix = YM_prefix = _f(r'''
         (?P<lm>
             L|  # 页码用罗马数字，但要≤16
             R)?  # 页码用小写罗马数字，但要≤16
-        (?P<zh>{_r(size)})  # 字号
-        (?P<zt>{_r(fontname)})  # 字体
-        (?P<ys>{_r(color)})?  # 颜色
+        (?P<zh>{_r[size]})  # 字号
+        (?P<zt>{_r[fontname]})  # 字体
+        (?P<ys>{_r[color]})?  # 颜色
         (?P<zs>  # 页码两边加装饰符，缺省为不加装饰符
             。|  # 页码两边加一实心圆点
             \-)?  # 页码两边加一条短线
-        (?P<yq>!|\#-?{_r(length)})?  # 页码在页面的对齐方式
-        (?:%(?P<jj>-?{_r(length)}))?  # 页码与正文间的距离
+        (?P<yq>!|\#-?{_r[length]})?  # 页码在页面的对齐方式
+        (?:%(?P<jj>-?{_r[length]}))?  # 页码与正文间的距离
         (?:=(?P<qs>\d+))?  # 起始页码
         (?P<sm>,S)?  # 表示页码在上
         (?:《W(?P<ww>.*?)》)?  # 外文外挂字体名
@@ -187,12 +187,12 @@ class WhitespacePatterns:
             SM|  # 中间对齐
             SY)  # 切口边对齐
         )?
-    '''
+    ''')
 
     # 页号注解（PN）
-    PN_infix = PN_prefix = rf'''
+    PN_infix = PN_prefix = _f(r'''
         (?:《(?P<bz>.+?)》)?  # 标识符
-        (?:-{page_number.replace('R|', '[LR]|')}  # 页号类型
+        (?:-{page_number}  # 页号类型
             (?P<dz>\^)?  # 单字页号
         )?
         (?:Y(?P<cx>  # 页号出现方式
@@ -206,8 +206,8 @@ class WhitespacePatterns:
             (?P<ds>[=!])  # 单双页页号的水平位置是一致/对称的
             (?:
                 (?:@(?P<yw>0?\d|1[0-2]))  # 预设位置
-                |(?P<py>-?{_r(lines)}|!)。  # 自定义纵向位置（!表示居中）
-                (?P<px>-?{_r(length)}|!)  # 自定义横向位置（!表示居中）
+                |(?P<py>-?{_r[lines]}|!)。  # 自定义纵向位置（!表示居中）
+                (?P<px>-?{_r[length]}|!)  # 自定义横向位置（!表示居中）
             )
         )?
         (?:V(?P<fx>[!=]))?  # 与版心排版方向相反/相同
@@ -219,4 +219,4 @@ class WhitespacePatterns:
             SM|  # 中间对齐
             SY)  # 切口边对齐
         )?
-    '''
+    ''', page_number=page_number.replace('R|', '[LR]|'))

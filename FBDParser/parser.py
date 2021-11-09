@@ -29,11 +29,11 @@ class Parser:
             self.do_anonymous(cmd)
         else:
             name, form, args = token
-            func = getattr(self, f'do_{name}', None)
+            func = getattr(self, 'do_' + name, None)
             func and func(form, **args)
 
     def do_operator(self, op):
-        func = getattr(self, f'do_{op}', None)
+        func = getattr(self, 'do_' + op, None)
         func and func()
 
     def do_text(self, text, font=''):
@@ -45,7 +45,7 @@ class Parser:
     def do_entity(self, cmd):
         cmd = normalize(cmd)
         name, args = parse_entity(cmd)
-        func = getattr(self, f'do_{name}', None)
+        func = getattr(self, 'do_' + name, None)
         func and func(**args)
 
     def parse(self, objects):
@@ -55,7 +55,7 @@ class Parser:
                 self.do_text(obj[1], font)
             else:
                 try:
-                    getattr(self, f'do_{obj[0]}')(obj[1])
+                    getattr(self, 'do_' + obj[0])(obj[1])
                 except FBDEOF:
                     break
 

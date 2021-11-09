@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 
 def gb2unicode_simple(x):
     a, b = (x & 0xFF00) >> 8, x & 0x00FF
@@ -8,14 +10,23 @@ def gb2unicode_simple(x):
     return ord(bytearray([a, b]).decode('gb18030'))
 
 
+def _unichr(x):
+    if x <= 0xFFFF:
+        return x
+    # U+10000 ~ U+10FFFF
+    return bytearray([
+        0xF0 | (x >> 18 & 0x7), 0x80 | (x >> 12 & 0x3F),
+        0x80 | (x >> 6 & 0x3F), 0x80 | (x & 0x3F)]).decode('utf-8')
+
+
 class _Symbols(dict):
     def __str__(self):
-        return f'unicode map contains {len(self)} symbols'
+        return 'unicode map contains {0} symbols'.format(len(self))
 
     def update(self, hashmap):
         for a, b in filter(lambda x: x[0] != x[1], hashmap.items()):
             if a != b:
-                self[gb2unicode_simple(a)] = b
+                self[gb2unicode_simple(a)] = _unichr(b)
 
 
 "A库符号"
@@ -1342,8 +1353,3 @@ symbolsB.update({
     0xBD9A: 0xBD9A,  # 不等于（= + \）
     0xBD9B: 0x1d463  # 𝑣
 })
-
-
-if __name__ == '__main__':
-    print(symbolsA)
-    print(symbolsB)

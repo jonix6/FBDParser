@@ -1,7 +1,21 @@
+# -*- coding: utf-8 -*-
 
 import re
 
-def _r(pat): return re.sub(r'\(\?P\<.*?\>', '(?:', pat)
+
+class _R:
+    def __init__(self, kwargs):
+        self.kwargs = kwargs
+
+    def __getitem__(self, key):
+        return re.sub(r'\(\?P\<.*?\>', '(?:', self.kwargs[key])
+
+
+def _f(pat, **vars):
+    args = dict(globals(), **vars)
+    args['_r'] = _R(args)
+    return pat.format(**args)
+
 
 "=======================================公用参数========================================="
 
@@ -13,56 +27,56 @@ size = r'''(?:
 )'''
 
 # 双向字号
-bisize = rf'''(?:
-    (?P<v>{_r(size)})  # 纵向字号
-    (?:,(?P<h>{_r(size)}))?  # 横向字号
-)'''
+bisize = _f(r'''(?:
+    (?P<v>{_r[size]})  # 纵向字号
+    (?:,(?P<h>{_r[size]}))?  # 横向字号
+)''')
 
 # 行距、字距
-length = rf'''(?:
+length = _f(r'''(?:
     (?P<p1>  # 以字号为单位
-        (?:(?P<size>{_r(size)})\:)?  # 单位字号
+        (?:(?P<size>{_r[size]})\:)?  # 单位字号
         (?:\d+(?:\*\d+(?:/\d+)?)?|\*\d+(?:/\d+)?)
     )|
     (?P<p2>\d+(?:\.\d+)?mm)|  # 以毫米为单位
     (?P<p3>\d+(?:\.\d+)?p)|  # 以磅为单位
     (?P<p4>\d+x)  # 以线为单位
-)'''
+)''')
 
 # 空行参数
-lines = rf'''(?:
+lines = _f(r'''(?:
     (?P<p1>\d+)|  # 整数行
-    (?P<p2>\d*\+{_r(length)})|  # 附加距离
+    (?P<p2>\d*\+{_r[length]})|  # 附加距离
     (?P<p3>\d*\*\d+(?:/\d+)?)  # 行占比
-)'''
+)''')
 
 # 起点
-anchor = rf'''(?:
+anchor = _f(r'''(?:
     (?P<qd>  # 起点
-        \((?:-?{_r(lines)})?,-?{_r(length)}\)|  # 绝对位置
+        \((?:-?{_r[lines]})?,-?{_r[length]}\)|  # 绝对位置
         # 相对当前栏（页）的位置
         # K表示要排到下一栏（页）的初始位置
         ,K?(?:[ZY]|S|[ZY][SX])|,X|,K
     )?
     (?P<pf>,PZ|,PY|,BP)?  # 排法
     (?P<dy>,DY)?  # 在分栏或对照时，内容可跨栏
-)'''
+)''')
 
 # 字体名
 fontname = r'[A-Z][A-Z1-9]*'
 
 # 字体集
-fontset = rf'''
-    (?P<zh>{_r(bisize)})  # 字号
-    (?P<ht>{_r(fontname)})  # 汉字字体
-    (?:&(?P<wt>{_r(fontname)}))?  # 外文字体
-    (?:&(?P<st>{_r(fontname)}))?  # 数字字体
+fontset = _f(r'''
+    (?P<zh>{_r[bisize]})  # 字号
+    (?P<ht>{_r[fontname]})  # 汉字字体
+    (?:&(?P<wt>{_r[fontname]}))?  # 外文字体
+    (?:&(?P<st>{_r[fontname]}))?  # 数字字体
     (?:《H(?P<hw>.*?)》)?  # 汉字外挂字体名
     (?:《W(?P<ww>.*?)》)?  # 外文外挂字体名
-'''
+''')
 
 # 颜色
-color = rf'''@(?P<ys>%?(?:
+color = r'''@(?P<ys>%?(?:
     \d+,\d+,\d+,\d+|
     \(\d+,\d+,\d+,\d+\))
 )'''
