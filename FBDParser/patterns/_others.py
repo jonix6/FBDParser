@@ -20,7 +20,8 @@ class OtherPatterns:
     '''
 
     # 书版注解（SB）
-    SB_infix = r'(?P<wj>[^,]+?(?:,[^,]+?){,39})'  # 文件名
+    SB_infix = r'''(?P<wj>  # 文件名
+        [^,]+?(?:,[^,]+?){,39})'''
 
     # 条码提取注解（TM）
     TM_prefix = r'''(?P<ys>  # 公文要素

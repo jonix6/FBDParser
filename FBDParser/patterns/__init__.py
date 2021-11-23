@@ -51,6 +51,16 @@ class CommandPatterns(
         m = pat and pat.match(cmd)
         return m and m.groupdict()
 
+    @classmethod
+    def manual(self, name, form):
+        if self.get(name, form):
+            info = {}
+            pat = getattr(self, name + '_' + form)
+            if _py2:
+                pat = pat.decode('utf-8')
+            for m in re.finditer(r'^.*?\(\?P\<(.*?)\>.*(?<!\\)#\s*(.*)$', pat, re.M):
+                info[m.group(1)] = m.group(2)
+            return info
 
 class EntityPatterns:
     @staticmethod

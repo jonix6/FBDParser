@@ -7,4 +7,5 @@ class MongolPatterns:
     YX_prefix = ''
 
     # 左旋注解（ZX）
-    ZX_prefix = r'(?P<mq>X)?'  # 蒙文单词与汉字的下沿对齐
+    ZX_prefix = r'''(?P<mq>  # 蒙文单词与汉字的下沿对齐
+        X)?'''

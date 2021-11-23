@@ -7,10 +7,10 @@ from ._frames import background
 
 # 字体
 font = _f(r'''
-    # 双向字号
-    (?P<zh>{_r[bisize]})?
-    # 字体名
-    (?P<zt>{_r[fontname]})?
+    (?P<zh>  # 字号
+        {_r[bisize]})?
+    (?P<zt>  # 字体名
+        {_r[fontname]})?
 ''')
 
 class TextPatterns:
@@ -45,7 +45,8 @@ class TextPatterns:
     )?'''
 
     # 粗细注解（CX）
-    CX_infix = r'(?P<js>-?[1-4])?'  # 级数，负数表示笔划变细
+    CX_infix = r'''(?P<js>  # 级数，负数表示笔划变细
+        -?[1-4])?'''
 
     # 大写字母风格注解（DF）
     DF_infix = r'''
@@ -56,17 +57,23 @@ class TextPatterns:
     '''
 
     # 繁简注解（FJ）
-    FJ_infix = r'(?P<fj>[FJ])?'  # 繁体/简体状态
+    FJ_infix = r'''(?P<fj>  # 繁体/简体状态
+        [FJ])?'''
 
     # 勾边注解（GB）
     GB_prefix = _f(r'''
         (?P<kd>[1-2]?\d)?  # 勾边宽度
         (?P<wk>W)?  # 不要边框的勾边字
         (?P<yz>Y)?  # 表示为阴字，即字为白色，边框为白色，勾边为黑色
-        (?:(?P<bs>{_r[color]})B)?  # 边框色
-        (?:(?P<gs>{_r[color]})G)?  # 勾边色
+        (?:(?P<bs>  # 边框色
+            {_r[color]})B)?
+        (?:(?P<gs>  # 勾边色
+            {_r[color]})G)?
     ''')
-    GB_infix = _f(r'{GB_prefix}(?:,(?P<zs>\d+))?', GB_prefix=GB_prefix)  # 字数
+    GB_infix = _f(r'''
+        {GB_prefix}
+        (?:,(?P<zs>\d+))?  # 字数
+    ''', GB_prefix=GB_prefix)
 
     # 紧排注解（JP）
     JP_infix = r'''
@@ -91,20 +98,27 @@ class TextPatterns:
         (?P<ww>[1-2]?\d|3[01])?  # 网纹编号
         (?P<wk>W)?  # 不要边框的空心字
     ''')
-    KX_infix = _f(r'{KX_prefix}(?:,(?P<zs>\d+))?', KX_prefix=KX_prefix)  # 字数
+    KX_infix = _f(r'''
+        {KX_prefix}
+        (?:,(?P<zs>\d+))?  # 字数
+    ''', KX_prefix=KX_prefix)
 
     # 立体注解（LT）
     LT_prefix = _f(r'''
         (?P<kd>[0-7])?  # 阴影宽度
-        (?P<ys>{_r[color]})?  # 阴影颜色
+        (?P<ys>  # 阴影颜色
+            {_r[color]})?
         (?P<wk>W)?  # 不要边框的立体字
         (?P<yz>Y)?  # 表示为阴字，即字为白色，阴影为黑色
-        (?P<fw>  # 缺省：阴影显示在字的右下方
+        (?P<fw>  # 阴影位置，缺省表示在字的右下方
             YS|  # 阴影显示在字的右上方
             ZS|  # 阴影显示在字的左上方
             ZX)?  # 阴影显示在字的左下方
     ''')
-    LT_infix = _f(r'{LT_prefix}(?:,(?P<zs>\d+))?', LT_prefix=LT_prefix)  # 字数
+    LT_infix = _f(r'''
+        {LT_prefix}
+        (?:,(?P<zs>\d+))?  # 字数
+    ''', LT_prefix=LT_prefix)
 
     # 禁排注解（PJ）
     PJ_infix = r'''
@@ -120,13 +134,15 @@ class TextPatterns:
     '''
 
     # 日文注解（RW）
-    RW_infix = r'(?P<jr>O)?'  # 使用日文旧字形
+    RW_infix = r'''(?P<jr>  # 使用日文旧字形
+        O)?'''
 
     # 角标大小设置注解（SS）
-    SS_infix = r'(?P<jb>[1-9]|10)?'  # 上下角标的字号级别
+    SS_infix = r'''(?P<jb>  # 上下角标的字号级别
+        [1-9]|10)?'''
 
     # 文种注解（WZ）
-    WZ_infix = r'''(?P<wz>
+    WZ_infix = r'''(?P<wz>  # 文种
         E|  # 英文
         R|  # 俄文
         M|  # 新蒙文
@@ -147,15 +163,19 @@ class TextPatterns:
 
     # 拼音注解（PY）
     PY_prefix = _f(r'''
-        (?P<zh>{_r[bisize]})?  # 拼音字号（注意：先横向后纵向）
-        (?P<ys>{_r[color]})?  # 颜色
-        (?:K(?P<jj>{_r[length]}))?  # 拼音与拼音之间的距离
-        (?:G(?P<dj>{_r[length]}))?  # 拼音与汉字之间的距离
-        (?P<pf>
+        (?P<zh>  # 拼音字号（注意：先横向后纵向）
+            {_r[bisize]})?
+        (?P<ys>  # 颜色
+            {_r[color]})?
+        (?:K(?P<jj>  # 拼音与拼音之间的距离
+            {_r[length]}))?
+        (?:G(?P<dj>  # 拼音与汉字之间的距离
+            {_r[length]}))?
+        (?P<pf>  # 拼音相对汉字位置
             S|  # 横排时拼音排在汉字之上，竖排时注音右转排在汉字之右
             L|  # 拼音直立排在汉字之右
             X)?  # 横排时拼音排在汉字之下，竖排时拼音右转排在汉字之左（缺省）
-        (?P<dq>
+        (?P<dq>  # 拼音与汉字对齐
             N|  # 横排时汉字靠左边排，竖排时汉字靠上排
             M|  # 汉字居中排（缺省）
             R)?  # 横排时汉字靠右边排，竖排时汉字靠下排
@@ -164,9 +184,12 @@ class TextPatterns:
 
     # 注音注解（ZY）
     ZY_prefix = _f(r'''
-        (?P<zh>{_r[bisize]})?  # 注音字号（注意：先横向后纵向）
-        (?P<ys>{_r[color]})?  # 颜色
-        (?:K(?P<dj>{_r[length]}))?  # 注音与汉字之间的距离
+        (?P<zh>  # 注音字号（注意：先横向后纵向）
+            {_r[bisize]})?
+        (?P<ys>  # 颜色
+            {_r[color]})?
+        (?:K(?P<dj>  # 注音与汉字之间的距离
+            {_r[length]}))?
         (?P<pf>[SLX])?  # 注音相对汉字位置（同PY）
     ''')
 
@@ -184,8 +207,12 @@ class TextPatterns:
             !   # 在外文和数字下加着重点
         )?
         (?P<hs>\#)?  # 着重线、着重点（或圈）加在一行的上面
-        (?:,(?P<jj>-?{_r[length]}))?  # 着重符与正文之间的距离
+        (?:,(?P<jj>  # 着重符与正文之间的距离
+            -?{_r[length]}))?
         |(?P<cm>A\d{{5}})  # 聪明码
         |(?:{background})?  # 底纹说明
     )''', background=background)
-    ZZ_infix = _f(r'(?P<zs>\d+){ZZ_prefix}', ZZ_prefix=ZZ_prefix)  # 字数
+    ZZ_infix = _f(r'''
+        (?P<zs>\d+)  # 字数
+        {ZZ_prefix}
+    ''', ZZ_prefix=ZZ_prefix)

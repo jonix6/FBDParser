@@ -16,8 +16,10 @@ class MarkPatterns:
 
     # 对开注解（DK）
     # 全身注解（QS）
-    DK_infix = QS_infix = r'(?P<zs>\d*)'  # 字数
+    DK_infix = QS_infix = r'''(?P<zs>  # 字数
+        \d*)'''
     DK_prefix = QS_prefix = ''
 
     # 外文注解（WW）
-    WW_infix = WW_prefix = r'(?P<bd>[ZH])?'  # 使用外文/汉字标点、括号
+    WW_infix = WW_prefix = r'''(?P<bd>  # 使用外文/汉字标点、括号
+        [ZH])?'''

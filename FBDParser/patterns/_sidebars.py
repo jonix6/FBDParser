@@ -21,25 +21,33 @@ class SideBarPatterns:
     # 边边注解（BB）
     BB_infix = _f(r'''
         {fontset}  # 字号、字体
-        (?P<ys>{_r[color]})?  # 颜色
+        (?P<ys>  # 颜色
+            {_r[color]})?
     ''')
 
     # 边栏注解（BL）
     BL_arg = _f(r'''
-        。(?P<lk>,?{_r[length]}|{_r[length]},{_r[length]})  # 版心内外栏宽
+        。(?P<lk>  # 版心内外栏宽
+            ,?{_r[length]}|{_r[length]},{_r[length]})
         (?:!
             (?:{column_sep}  # 栏线线型
-                (?P<xh>{_r[size]})?  # 栏线字号
+                (?P<xh>  # 栏线字号
+                    {_r[size]})?
             )?
-            (?P<xs>{_r[color]})?  # 栏线颜色
+            (?P<xs>  # 栏线颜色
+                {_r[color]})?
         )?
-        (?:K(?P<jj>{_r[length]}))?  # 主副栏间距
+        (?:K(?P<jj>  # 主副栏间距
+            {_r[length]}))?
     ''', column_sep=column_sep)
     BL_prefix = _f(r'''
         (?:
-            1(?P<l1>{_r[BL_arg]})  # 第一个副栏参数
-            (?:;2(?P<l2>{_r[BL_arg]}))?  # 第二个副栏参数
-            |2(?P<l3>{_r[BL_arg]})  # 第二个副栏参数（独立）
+            1(?P<l1>  # 第一个副栏参数
+                {_r[BL_arg]})
+            (?:;2(?P<l2>  # 第二个副栏参数
+                {_r[BL_arg]}))?
+            |2(?P<l3>  # 第二个副栏参数（独立）
+                {_r[BL_arg]})
         )(?P<hl>,X)?  # 每次换页后副栏与主栏/另一副栏左右位置互换
     ''', BL_arg=BL_arg)
 

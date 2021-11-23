@@ -67,7 +67,8 @@ fontname = r'[A-Z][A-Z1-9]*'
 
 # 字体集
 fontset = _f(r'''
-    (?P<zh>{_r[bisize]})  # 字号
+    (?P<zh>  # 字号
+        {_r[bisize]})
     (?P<ht>{_r[fontname]})  # 汉字字体
     (?:&(?P<wt>{_r[fontname]}))?  # 外文字体
     (?:&(?P<st>{_r[fontname]}))?  # 数字字体
@@ -76,9 +77,9 @@ fontset = _f(r'''
 ''')
 
 # 颜色
-color = r'''@(?P<ys>%?(?:
-    \d+,\d+,\d+,\d+|
-    \(\d+,\d+,\d+,\d+\))
+color = r'''@(?P<ys>%?(?:  # CMYK值/百分比
+    \d{1,3},\d{1,3},\d{1,3},\d{1,3}|
+    \(\d{1,3},\d{1,3},\d{1,3},\d{1,3}\))
 )'''
 
 # 花边线

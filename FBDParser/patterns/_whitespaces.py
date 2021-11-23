@@ -37,10 +37,14 @@ class WhitespacePatterns:
 
     # 背景注解（BJ）
     BJ_prefix = _f(r'''
-        (?P<zj>-?{_r[length]})?,  # 左边距
-        (?P<sj>-?{_r[length]})?,  # 上边距
-        (?P<yj>-?{_r[length]})?,  # 右边距
-        (?P<xj>-?{_r[length]})?  # 下边距
+        (?P<zj>  # 左边距
+            -?{_r[length]})?,
+        (?P<sj>  # 上边距
+            -?{_r[length]})?,
+        (?P<yj>  # 右边距
+            -?{_r[length]})?,
+        (?P<xj>  # 下边距
+            -?{_r[length]})?
         (?P<fp>\#)?  # 排法与正文排法相反
     ''')
 
@@ -53,17 +57,22 @@ class WhitespacePatterns:
         )?
         (?:\(
             (?P<wz>[SXZY])?  # 边文位于版心的上/下/左/右面，缺省为上
-            (?P<bj>-?{_r[length]})?  # 边文与版心之间的距离，缺省为一五号字
-            ,(?P<sj>-?{_r[length]})?  # 左/上边距，缺省均为0
-            ,(?P<zj>-?{_r[length]})?  # 右/下边距，缺省均为0
+            (?P<bj>  # 边文与版心之间的距离，缺省为一五号字
+                -?{_r[length]})?
+            ,(?P<sj>  # 左/上边距，缺省均为0
+                -?{_r[length]})?
+            ,(?P<zj>  # 右/下边距，缺省均为0
+                -?{_r[length]})?
         \))?
-        (?:G(?P<gd>{_r[length]}\#?))?  # 边文高
+        (?:G(?P<gd>  # 边文高
+            {_r[length]}\#?))?
         (?:M(?P<qs>\d*)  # 页码的起始页号
             (?:  # 页码型号
                 {page_number}|  # 单字页码
                 D  # 多字页码
                     (?P<dz>Z)?  # 使用中文数字页码
-                    (?P<mk>{_r[length]})?   # 多字页码宽度
+                    (?P<mk>   # 多字页码宽度
+                        {_r[length]})?
                     (?P<mq>[ZY]Q)?\#?  # 多字页码左/右对齐排
             )
         )?
@@ -84,15 +93,21 @@ class WhitespacePatterns:
             DS,SM|  # 单页排首词条，双页排末词条
             M)  # 单、双页都排末词条
         )?
-        (?:J(?P<qk>{_r[length]}))?  # 词条切口距离
+        (?:J(?P<qk>  # 词条切口距离
+            {_r[length]}))?
         {fontset}  # 字号、字体
         (?P<pl>,L)?  # 书眉排在里口
         (?P<pw>,W)?  # 书眉排在外口
-        (?:,(?P<mx>{running_head}))?  # 书眉线
-        (?:(?P<ys>{_r[color]})Z)?  # 字颜色
-        (?:(?P<xs>{_r[color]})X)?  # 线颜色
-        (?:。(?P<xj>{_r[length]}))?  # 书眉与眉线之间的距离
-        (?:,(?P<wj>{_r[length]}))?  # 眉线与正文之间的距离
+        (?:,(?P<mx>  # 书眉线
+            {running_head}))?
+        (?:(?P<ys>  # 字颜色
+            {_r[color]})Z)?
+        (?:(?P<xs>  # 线颜色
+            {_r[color]})X)?
+        (?:。(?P<xj>  # 书眉与眉线之间的距离
+            {_r[length]}))?
+        (?:,(?P<wj>  # 眉线与正文之间的距离
+            {_r[length]}))?
         (?:  # 书眉线调整
             (?:;L(?P<nk>-?{_r[length]}))?  # 书眉线内扩
             (?:;W(?P<wk>-?{_r[length]})!?)?  # 书眉线外扩
@@ -103,11 +118,13 @@ class WhitespacePatterns:
     # 单眉注解（DM）
     # 眉眉注解（MM）
     # 双眉注解（SM）
-    DM_prefix = MM_prefix = SM_prefix = r'(?P<lw>[LW])?'  # 书眉排在里/外口
+    DM_prefix = MM_prefix = SM_prefix = r'''(?P<lw>  # 书眉排在里/外口
+        [LW])?'''
 
     # 空眉注解（KM）
     KM_infix = _f(r'''
-        (?P<mx>{running_head})?  # 书眉线
+        (?P<mx>  # 书眉线
+            {running_head})?
         (?P<tk>T)?  # 能同时控制书眉、词条、边文显示
     ''', running_head=running_head)
 
@@ -115,9 +132,10 @@ class WhitespacePatterns:
     BY_infix = _f(r'''
         (?P<jy>J)?  # 本页的背景内容隐藏
         (?P<wy>W)?  # 本页的边文内容隐藏
-        (?P<yy>YW?)?  # 本页的页码内容隐藏。参数〔W〕表示本页页码不占页号，不显示
+        (?P<yy>YW?)?  # 本页的页码内容隐藏。参数W表示本页页码不占页号，不显示
         (?:(?P<my>M)  # 本页的书眉内容隐藏
-            (?P<mx>Z|{running_head})?  # 书眉内容隐藏时的书眉线类型
+            (?P<mx>  # 书眉内容隐藏时的书眉线类型
+                Z|{running_head})?
         )?
         (?:(?P<ny>N)  # 本页的页号内容隐藏
             (?P<nf>(?:《.+?》)*)  )?  # 需要隐藏的页号标识符
@@ -126,10 +144,12 @@ class WhitespacePatterns:
     ''', running_head=running_head)
 
     # 词条注解（CT）
-    CT_prefix = r'(?P<yt>\#)?'  # 词条为隐词条，不出现在正文
+    CT_prefix = r'''(?P<yt>  # 词条为隐词条，不出现在正文
+        \#)?'''
     CT_infix = _f(r'''{CT_prefix}
         (?P<kc>!)?  # 词条将被无条件添加到入到书眉中无论上一个词条是否与本词条相同
-        (?:K(?P<kg>{_r[length]}))?  # 后加设置的空格字距
+        (?:K(?P<kg>  # 后加设置的空格字距
+            {_r[length]}))?
     ''', CT_prefix=CT_prefix)
 
     # 多页分区注解（MQ）
@@ -162,19 +182,23 @@ class WhitespacePatterns:
 
     # 页码注解（YM）
     YM_infix = YM_prefix = _f(r'''
-        (?P<lm>
-            L|  # 页码用罗马数字，但要≤16
+        (?P<lm>  # 页码用罗马数字
+            L|  # 页码用大写罗马数字，但要≤16
             R)?  # 页码用小写罗马数字，但要≤16
-        (?P<zh>{_r[size]})  # 字号
-        (?P<zt>{_r[fontname]})  # 字体
-        (?P<ys>{_r[color]})?  # 颜色
+        (?P<zh>  # 页码字号
+            {_r[size]})
+        (?P<zt>{_r[fontname]})  # 页码字体
+        (?P<ys>  # 页码颜色
+            {_r[color]})?
         (?P<zs>  # 页码两边加装饰符，缺省为不加装饰符
             。|  # 页码两边加一实心圆点
             \-)?  # 页码两边加一条短线
-        (?P<yq>!|\#-?{_r[length]})?  # 页码在页面的对齐方式
-        (?:%(?P<jj>-?{_r[length]}))?  # 页码与正文间的距离
+        (?P<yq>  # 页码在页面的对齐方式
+            !|\#-?{_r[length]})?
+        (?:%(?P<jj>  # 页码与正文间的距离
+            -?{_r[length]}))?
         (?:=(?P<qs>\d+))?  # 起始页码
-        (?P<sm>,S)?  # 表示页码在上
+        (?P<sm>,S)?  # 页码在上
         (?:《W(?P<ww>.*?)》)?  # 外文外挂字体名
         (?::(?P<dq>  # 页码对齐方式
             Z|  # 左边对齐
@@ -206,8 +230,10 @@ class WhitespacePatterns:
             (?P<ds>[=!])  # 单双页页号的水平位置是一致/对称的
             (?:
                 (?:@(?P<yw>0?\d|1[0-2]))  # 预设位置
-                |(?P<py>-?{_r[lines]}|!)。  # 自定义纵向位置（!表示居中）
-                (?P<px>-?{_r[length]}|!)  # 自定义横向位置（!表示居中）
+                |(?P<py>  # 自定义纵向位置（!表示居中）
+                    -?{_r[lines]}|!)。
+                (?P<px>  # 自定义横向位置（!表示居中）
+                    -?{_r[length]}|!)
             )
         )?
         (?:V(?P<fx>[!=]))?  # 与版心排版方向相反/相同

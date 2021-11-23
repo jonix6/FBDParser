@@ -20,21 +20,24 @@ class FormulaPatterns:
 
     # 顶底注解（DD）
     DD_arg = _f(r'''
-        (?P<w>  # 位置，缺省时居中排
+        (?P<w>  # 盒组位置，缺省时居中排
             Z|  # 左对齐
             Y|  # 右对齐
             M)?  # 撑满排
-        (?P<j>-?{_r[length]})?  # 附加距离
+        (?P<j>  # 盒组附加距离
+            -?{_r[length]})?
     ''')
     DD_prefix = _f(
         r''' # 单项参数
-        (?P<d0>X?  # 表示顶底内容加在下面
+        (?P<d0>X?  # 顶底内容加在下面
             {DD_arg_0})
         |  # 双项参数
         (?:{DD_arg_1}(?:;{DD_arg_2})?)
     ''', DD_arg_0=DD_arg.replace('<w>', '<w0>').replace('<j>', '<j0>'),
-        DD_arg_1=DD_arg.replace('<w>', '<w1>').replace('<j>', '<j1>'),
-        DD_arg_2=DD_arg.replace('<w>', '<w2>').replace('<j>', '<j2>'))
+        DD_arg_1=DD_arg.replace('<w>', '<w1>')
+        .replace('<j>', '<j1>').replace('盒组', '上盒组'),
+        DD_arg_2=DD_arg.replace('<w>', '<w2>')
+        .replace('<j>', '<j2>').replace('盒组', '下盒组'))
 
     # 方程注解（FC）
     FC_prefix = r'''
@@ -45,14 +48,16 @@ class FormulaPatterns:
     # 行列注解（HL）
     HL_arg = _f(r'''
         (?P<lh>\d+),  # 列号
-        (?:(?P<lj>{_r[length]}[ZY]?)|  # 列距（与左/右对齐）
+        (?:(?P<lj>  # 列距（与左/右对齐）
+            {_r[length]}[ZY]?)|
         (?P<wz>[ZY]))  # 左/右对齐
     ''')
     HL_prefix = _f(r'''
         (?P<ls>\d+)  # 总列数
         (?P<xx>[FSZDQ=])?  # 分割线线型
         (?::
-            (?P<lx>{_r[HL_arg]}(?:;{_r[HL_arg]})*)  # 列信息
+            (?P<lx>  # 列信息
+                {_r[HL_arg]}(?:;{_r[HL_arg]})*)
         )?
     ''', HL_arg=HL_arg)
 
@@ -63,7 +68,8 @@ class FormulaPatterns:
         (?P<kf>{_JB_open})?  # 开界标符
         (?P<jz>Z)?  # 界标符居中
     ''', _JB_open=_JB_open)
-    JB_suffix = _f(r'(?P<bf>{_JB_close})?', _JB_close=_JB_close)  # 闭界标符
+    JB_suffix = _f(r'''(?P<bf>{_JB_close}  # 闭界标符
+        )?''', _JB_close=_JB_close)
     JB_infix = _f(r'''
         (?:<  # 开界标
             (?P<kd>\d+\*?)  # 开界标大小
@@ -75,13 +81,16 @@ class FormulaPatterns:
     ''', _JB_open=_JB_open, _JB_close=_JB_close)
 
     # 积分注解（JF）
-    JF_prefix = r'(?P<fg>[DZ])?'  # 上、下限符号在积分符号的顶端/侧面
+    JF_prefix = r'''(?P<fg>  # 上、下限符号在积分符号的顶端/侧面
+        [DZ])?'''
 
     # 开方注解（KF）
-    KF_prefix = r'(?P<ks>S)?'  # 指定开方数
+    KF_prefix = r'''(?P<ks>  # 指定开方数
+        S)?'''
 
     # 添线注解（TX）
-    TX_prefix = TX_suffix = _f(r'(?P<jj>-?{_r[length]})?')  # 添线与盒子的距离
+    TX_prefix = TX_suffix = _f(r'''(?P<jj>  # 添线与盒子的距离
+        -?{_r[length]})?''')
     TX_infix = _f(r'''
         (?P<hx>X)?  # 在盒子下面添线
         (?P<bg>B)?  # 添线内容不占高度
@@ -95,9 +104,12 @@ class FormulaPatterns:
         (?P<cx>C)?  # 指定分数线加长
         (?P<wx>B)?  # 不要分数线
         (?P<dq>[ZY])?  # 上下盒子左/右对齐
-        (?P<jj>-?{_r[length]})?  # 上下盒组间的距离
+        (?P<jj>  # 上下盒组间的距离
+            -?{_r[length]})?
     ''')
 
     # 左齐注解（ZQ）
-    ZQ_prefix = _f(r'(?P<zj>{_r[length]})?')  # 字间距
-    ZQ_infix = _f(r'(?P<zs>\d+)(?:,{ZQ_prefix})?', ZQ_prefix=ZQ_prefix)  # 字数
+    ZQ_prefix = _f(r'''(?P<zj>  # 字间距
+        {_r[length]})?''')
+    ZQ_infix = _f(r'''(?P<zs>\d+)  # 字数
+        (?:,{ZQ_prefix})?''', ZQ_prefix=ZQ_prefix)

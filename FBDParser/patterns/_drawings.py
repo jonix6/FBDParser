@@ -30,15 +30,18 @@ class DrawingPatterns:
             \#|  # 在当前行的基线上画线
             %)?  # 在当前行的顶线上画线
         {line_styles}
-        (?P<cd>-?{_r[length]}|!-?{_r[lines]})  # 长度/高度
+        (?P<cd>  # 长度/高度
+            -?{_r[length]}|!-?{_r[lines]})
         (?P<ch>Z)?  # 可拆行
     ''', line_styles=line_styles)
 
     # 画线注解（HX）
     HX_prefix = _f(r'''
-        (?P<wz>{_r[lines]},{_r[length]})\)  # 画线位置
+        (?P<wz>  # 画线位置
+            {_r[lines]},{_r[length]})\)
         {line_styles}
-        (?P<cd>-?{_r[length]}|!-?{_r[lines]})  # 长度/高度
+        (?P<cd>  # 长度/高度
+            -?{_r[length]}|!-?{_r[lines]})
         (?P<ch>Z)?  # 可拆行
     ''', line_styles=line_styles)
 
@@ -46,16 +49,20 @@ class DrawingPatterns:
     JD_infix = _f(r'''
         (?P<dw>[0-8]\d\d\d)  # 底纹编号
         (?:
-            (?:\((?P<wz>{_r[lines]},{_r[length]})\))?  # 位置
-            (?P<hd>{_r[lines]})  # 高度
-            。(?P<kd>{_r[length]})  # 宽度
+            (?:\((?P<wz>  # 位置
+                {_r[lines]},{_r[length]})\))?
+            (?P<gd>  # 高度
+                {_r[lines]})
+            。(?P<kd>  # 宽度
+                {_r[length]})
         )?
         (?P<tw>D)?  # 本方框底纹代替外层底纹
         (?P<yw>H)?  # 底纹用阴图
     ''')
 
     # 线字号注解（XH）
-    XH_infix = _f(r'(?P<xh>{_r[size]})?')  # 线字号
+    XH_infix = _f(r'''(?P<xh>  # 线字号
+    {_r[size]})?''')
 
     # 斜线注解（XX）
     XX_infix = _f(r'''

@@ -9,14 +9,18 @@ class ColumnPatterns:
     # 分栏注解（FL）
     FL_prefix = _f(r'''
         (?:
-            (?P<lk>{_r[length]}(?:,{_r[length]}){{1,7}})  # 栏宽
+            (?P<lk>  # 栏宽
+                {_r[length]}(?:,{_r[length]}){{1,7}})
             |(?P<ls>[2-8])  # 均分成几栏
         )?
         (?P<hx>!)?  # 栏间画一条以五号字为准的正线
-        (?:H(?P<xh>{_r[size]}))?  # 栏线的粗细
+        (?:H(?P<xh>  # 栏线的粗细
+            {_r[size]}))?
         (?:-{column_sep})?  # 栏线线型
-        (?P<ys>{_r[color]})?  # 颜色
-        (?:K(?P<jj>{_r[length]}))?  # 栏间距
+        (?P<ys>  # 栏线颜色
+            {_r[color]})?
+        (?:K(?P<jj>  # 栏间距
+            {_r[length]}))?
     ''', column_sep=column_sep)
     FL_suffix = r'''(?:
         (?P<xp>X)|  # 后边分栏注解中的内容与前面的内容接排

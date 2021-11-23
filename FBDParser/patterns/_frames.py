@@ -11,7 +11,7 @@ background = r'''
     (?P<pw>\#)?  # 底纹不留余白
 '''
 
-border = _f(r'''(?P<kx>  # 边框说明
+border = _f(r'''(?P<kx>  # 框线
     F|  # 反线
     S|  # 双线
     D|  # 点线
@@ -30,32 +30,41 @@ class FramePatterns:
     FK_infix = _f(r'''
         {border}?  # 边框说明
         (?:{background})?  # 底纹说明
-        (?:TK(?P<sk>{_r[lines]}))?  # 上边空
-        (?:JK(?P<xk>{_r[lines]}))?  # 下边空
+        (?:TK(?P<sk>  # 上边空
+            {_r[lines]}))?
+        (?:JK(?P<xk>  # 下边空
+            {_r[lines]}))?
         (?P<nk>!)?  # 边框线不占位
     ''', border=border, background=background)
     FK_prefix = _f(r'''
         {border}?  # 边框说明
         (?:{background})?  # 底纹说明
         (?:
-            (?P<gd>{_r[lines]})?  # 方框高度
-            (?:。(?P<kd>{_r[length]}))?  # 方框宽度
-            |(?:TK(?P<sk>{_r[lines]}))?  # 上边空
-            (?:JK(?P<xk>{_r[lines]}))?  # 下边空
+            (?P<gd>  # 方框高度
+                {_r[lines]})?
+            (?:。(?P<kd>  # 方框宽度
+                {_r[length]}))?
+            |(?:TK(?P<sk>  # 上边空
+                {_r[lines]}))?
+            (?:JK(?P<xk>  # 下边空
+                {_r[lines]}))?
         )?
         (?:(?P<dq>  # 内容对齐
             ZQ|  # 左齐
             YQ|  # 右齐
             CM)  # 撑满
-            (?P<sj>{_r[length]})?  # 内容缩进
+            (?P<sj>  # 内容缩进
+                {_r[length]})?
         )?
         (?P<nk>!)?  # 边框线不占位
     ''', border=border, background=background)
 
     # 分区注解（FQ）
     FQ_prefix = _f(r'''
-        (?P<gd>{_r[lines]})  # 分区高度
-        (?:。(?P<kd>{_r[length]}))?  # 分区宽度
+        (?P<gd>  # 分区高度
+            {_r[lines]})
+        (?:。(?P<kd>  # 分区宽度
+            {_r[length]}))?
         {anchor}  # 起点、排法
         (?:-{border})?  # 边框说明
         (?:{background})?  # 底纹说明

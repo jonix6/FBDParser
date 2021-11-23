@@ -8,10 +8,14 @@ class LayoutPatterns:
     # 版心注解（BX）
     BX_infix = _f(r'''
         {fontset}  # 字号、字体
-        (?P<ys>{_r[color]})?,  # 颜色
-        (?P<bg>{_r[length]})。  # 版心高
-        (?P<bk>{_r[length]}),  # 版心宽
-        (?P<hj>{_r[length]})  # 行距
+        (?P<ys>  # 文字颜色
+            {_r[color]})?,
+        (?P<bg>  # 版心高
+            {_r[length]})。
+        (?P<bk>  # 版心宽
+            {_r[length]}),
+        (?P<hj>  # 行距
+            {_r[length]})
         (?P<sp>!?)  # 竖排
         (?P<bj>B?)  # 指定不拉行距
         (?P<db>D?)  # 表明页码和书眉相互独立，互不影响
@@ -37,23 +41,27 @@ class LayoutPatterns:
     # 始点注解（SD）
     SD_infix = _f(r'''(?:
         (?P<xp>X)|  # 将本注解前所排的内容先写入磁盘文件中，然后从当前位置继续排
-        (?P<dy>{_r[lines]})?  # 始点垂直位置
-        (?:,(?P<dx>{_r[length]}))?  # 始点水平位置
+        (?P<dy>  # 始点垂直位置
+            {_r[lines]})?
+        (?:,(?P<dx>  # 始点水平位置
+            {_r[length]}))?
         (?P<xf>;N)?  # 按新方法计算排版的位置
     )?''')
 
     # 段首缩进注解（SJ）
     SJ_infix = _f(r'''(?:
-        (?P<zk>{_r[size]})  # 缩进单位字号
+        (?P<zk>  # 缩进单位字号
+            {_r[size]})
         (?:。(?P<zs>[1-9]|10))?  # 缩进字数
-        |(?:J(?P<sk>{_r[length]}))  # 缩进距离值
+        |(?:J(?P<sk>  # 缩进距离值
+            {_r[length]}))
     )?''')
 
     # 上齐注解（SQ）
     # 整体注解（ZT）
     SQ_infix = ZT_prefix = _f(r'''
-        (?P<hj>{_r[lines]})?
-    ''')
+        (?P<gd>  # 高度
+            {_r[lines]})?''')
 
     # 数字注解（SZ）
     SZ_infix = r'''(?P<sp>  # 竖排时数字排法
@@ -62,7 +70,9 @@ class LayoutPatterns:
     )?'''
 
     # 外文竖排（WP）
-    WP_infix = r'(?P<dp>D)?'  # 外文字母单个单个直立排
+    WP_infix = r'''(?P<dp>  # 外文字母单个单个直立排
+        D)?'''
 
     # 消除单字行注解（XD）
-    XD_infix = r'(?P<cx>!)?'  # 后面的文字不消除单字行
+    XD_infix = r'''(?P<cx>  # 后面的文字不消除单字行
+        !)?'''
