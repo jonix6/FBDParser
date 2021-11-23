@@ -13,9 +13,6 @@ def normalize(s):
 
 
 class Parser:
-    def __init__(self):
-        self.compilers = {}
-
     def do_anonymous(self, cmd):
         pass
 

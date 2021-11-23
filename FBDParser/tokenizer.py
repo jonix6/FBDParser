@@ -275,6 +275,10 @@ class Tokenizer:
             cur != state and self.new_object(state)
         self.current += char
 
+    def parse_space(self, cate, char):
+        if not self.current or self.current[-1] != ' ':
+            self.current += u' '
+
     def parse_symbol(self, font, char):
         return self.parse_plain('text@' + font, char)
 
@@ -297,7 +301,7 @@ class Tokenizer:
             else:
                 self.curstack().append(('operator', cate))
 
-    def parse_hidden(self, cate, char):
+    def parse_control(self, cate, char):
         pass
 
     def tokenize(self, tokens):

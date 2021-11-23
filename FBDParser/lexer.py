@@ -66,6 +66,8 @@ class Lexer:
             cate2 = 'symbolA'
         elif char < ' ':
             cate1 = 'control'
+        elif char.isspace():
+            cate1 = 'space'
         return cate1, cate2, char
 
     def parse_gbk(self, fp):
