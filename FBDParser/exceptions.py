@@ -3,6 +3,10 @@ class FBDCommandError(Exception):
     pass
 
 
+class FBDEncodingError(Exception):
+    pass
+
+
 class FBDEntityError(Exception):
     pass
 
