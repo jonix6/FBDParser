@@ -108,7 +108,7 @@ class Tokenizer:
         self.current = u''
 
         self.stack = deque()
-        self.escape = 0
+        self.escape = ''
         self.comment = []
 
         self.templates = {}
@@ -118,7 +118,7 @@ class Tokenizer:
         del self.state_stack[:]
         self.current = u''
         del self.stack[:]
-        self.escape = 0
+        self.escape = ''
         del self.comment[:]
         self.templates.clear()
         del self.temp_stack[:]
@@ -168,23 +168,30 @@ class Tokenizer:
 
     def escape_token(self, token):
         state = self.get_current_state()
-        escape, self.escape = self.escape, 0
-        if escape == 1:
-            return self.parse_char(state, token[2])
-        elif escape == 3:
+        escape, self.escape = self.escape, ''
+        if escape == 'raw':
+            self.parse_char(state, token[2])
+        elif escape == 'shortcut':
+            if ' ' <= token[2] <= '~':
+                text = escaped_tokens.get(token[2], token[2])
+                for token in Lexer(apply_ascii_operator=False).fromstring(text):
+                    self.parse_token(token)
+            else:
+                self.parse_char(state, '\\')
+                self.parse_token(token)
+        elif escape == 'math':
+            if token[0] == 'operator' and token[1] == 'math_sign':
+                self.curstack().append(('operator', 'math_block'))
+            else:
+                self.curstack().append(('operator', 'math_inline'))
+                self.parse_token(token)
+        elif escape == 'argument':
             self._assert('1' <= token[2] <= '9', FBDSyntaxError(
                 'invalid argument index: ' + token[2] + ' for template ' + self.temp_stack[0][0]))
             i = int(token[2])
             self.temp_stack[-1].append(('argindex', i))
             self.temp_stack[0][1] |= 1 << i
-            return self.temp_stack.append([])
-        if ' ' <= token[2] <= '~':
-            text = escaped_tokens.get(token[2], token[2])
-            for token in Lexer(apply_ascii_operator=False).fromstring(text):
-                self.parse_token(token)
-        else:
-            self.parse_char(state, '\\')
-            self.parse_token(token)
+            self.temp_stack.append([])
 
     def parse_open(self, cate, char):
         state = self.get_current_state()
@@ -283,23 +290,45 @@ class Tokenizer:
         return self.parse_plain('text@' + font, char)
 
     def parse_operator(self, cate, char):
-        if cate == 'escape':
-            self.escape = 1
-        elif cate == 'pattern':
-            self.escape = 2
-        elif cate != 'endfeed' and not self.get_current_state().startswith('text'):
+        if cate == 'pattern':
+            self.escape = 'shortcut'
+        elif not self.get_current_state().startswith('text'):
             self.current += char
+        elif cate == 'escape':
+            self.escape = 'raw'
         else:
             self.new_object()
-            if cate == 'page_num' and self.temp_stack and self.temp_stack[0][1] >= 0:
+            if cate == 'math_sign':
+                self.escape = 'math'
+            elif cate == 'page_num' and self.temp_stack and self.temp_stack[0][1] >= 0:
                 if self.temp_stack[0][1]:
-                    self.escape = 3
+                    self.escape = 'argument'
                 else:
                     self.temp_stack.append([])
             elif cate == 'endfeed' and self.temp_stack and self.temp_stack[0][1] == -1:
                 self.temp_stack.append([])
             else:
                 self.curstack().append(('operator', cate))
+
+        # if cate == 'escape':
+        #     self.escape = 1
+        # elif cate == 'pattern':
+        #     self.escape = 2
+        # elif cate == 'math_sign':
+        #     self.escape = 3
+        # elif cate != 'endfeed' and not self.get_current_state().startswith('text'):
+        #     self.current += char
+        # else:
+        #     self.new_object()
+        #     if cate == 'page_num' and self.temp_stack and self.temp_stack[0][1] >= 0:
+        #         if self.temp_stack[0][1]:
+        #             self.escape = 4
+        #         else:
+        #             self.temp_stack.append([])
+        #     elif cate == 'endfeed' and self.temp_stack and self.temp_stack[0][1] == -1:
+        #         self.temp_stack.append([])
+        #     else:
+        #         self.curstack().append(('operator', cate))
 
     def parse_control(self, cate, char):
         pass
