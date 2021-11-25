@@ -10,8 +10,8 @@ class TestParser(Parser):
     def __init__(self):
         self.formula = ''
 
-    def do_math_sign(self):
-        self.formula += '$'
+    def do_math_block(self):
+        self.formula += '\n$$\n'
 
     def do_text(self, text, font=''):
         self.formula += text
