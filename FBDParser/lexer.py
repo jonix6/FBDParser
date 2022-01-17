@@ -3,8 +3,9 @@
 import codecs
 from io import BytesIO
 
-TILDE_AS_HYPHEN = False
+TILDE_AS_HYPHEN = False  # 将"~"处理为软连字符
 
+# 注解括弧对
 enclosing = {
     u'〖': ('open', 'command'),
     u'〗': ('close', 'command'),
@@ -12,6 +13,7 @@ enclosing = {
     u'\ue002': ('close', 'entity')
 }
 
+# 操作符
 operators = {
     u'\ue001': 'escape',
     u'\ue003': 'return',
@@ -30,6 +32,7 @@ operators = {
     u'\ue5e9': 'verythinsp'
 }
 
+# ascii操作符，按设置控制是否识别
 ascii_operators = {
     '[': ('open', 'command'),
     ']': ('close', 'command'),
@@ -38,11 +41,23 @@ ascii_operators = {
 
 
 class Lexer:
+    '''### 字符类型识别器
+
+    #### 主要功能
+
+    逐字符读取数据流，按语法判断其语义类型，控制分词（tokenize）结果
+
+    #### 传入参数
+
+    + strict (bool): 若为true，当出现解码错误时报告异常，否则跳过继续读取
+    + apply_ascii_operator (bool): 将"[, ], \\\\" 处理为转义字符'''
+
     def __init__(self, strict=False, apply_ascii_operator=True):
         self.strict = strict
         self.apply_ascii_operator = apply_ascii_operator
 
     def readbyte(self, fp, n):
+        '读取n个字节数据'
         try:
             val = fp.read(n).encode('gb18030')
         except UnicodeError as e:
@@ -53,6 +68,7 @@ class Lexer:
         return val
 
     def parse_char(self, char):
+        '判断字符类型'
         cate1, cate2 = 'plain', 'text'
         if char in enclosing:
             cate1, cate2 = enclosing[char]
@@ -71,24 +87,42 @@ class Lexer:
         return cate1, cate2, char
 
     def parse_gbk(self, fp):
+        '''获取GB18030四字节字符或B库字符编码，并进行解码。
+
+        解码方式: 
+
+        + B库字符: 0e ff f0 | fe ** [aa bb] | 0f -> [aa bb]
+        + GB18030四字节字符: 0e ff f0 | ff [ab cd ef] | 0f -> [aa 3e cd 3e]'''
         b = self.readbyte(fp, 2)
         c = self.readbyte(fp, 2)
         d = self.readbyte(fp, 1)
         if d == b'\x0f' and len(b) == len(c) == 2:
-            if b == b'\xfe\x01':
+            if b[0] == 0xfe and b[1] < 0x80:
                 return 'plain', 'symbolB', c.decode('gb18030')
             elif b[0] == 0xff:
-                return 'plain', 'text', bytearray([b[1]-1, 48+c[1]//16, c[0], 48+c[1] % 16-1]).decode('gb18030')
-        fp.seek(-len(b + c + d), 1)
+                return 'plain', 'text', bytearray([b[1]-1, 48+c[1]//16, c[0], 47+c[1] % 16]).decode('gb18030')
+        fp.seek(-len(b + c + d)-1, 1)
 
     def parse_symbol(self, fp, n):
+        '''获取使用外挂字体的字符和所用字体。
+
+        解码方式: 0e fe | 86 (S y m b o l) [4a d2 f1] | 0f -> charcode=0xca, font=Symbol
+
+        |4a          |d2          |f1          |
+        |------------|------------|------------|
+        |01[001010]  |110100[10]  |111100[01]  |
+        |00[001010]  |[10]000000  |[01]000000  |
+
+        -> 11001010 -> 0xca'''
         fontname = self.readbyte(fp, n)
         x = self.readbyte(fp, 4)
         if len(x) == 4 and x[3] == 0xf:
-            return 'symbol', fontname.decode('gb18030'), chr((x[1] - 0x40) * 0x40 + x[0] - 0x40)
-        fp.seek(-len(fontname + x), 1)
+            code = x[0] & 0x3f | ((x[1] | x[2]) & 3 << 6)
+            return 'symbol', fontname.decode('gb18030'), chr(code)
+        fp.seek(-len(fontname + x)-1, 1)
 
     def lex(self, fp):
+        '迭代解析每个有语义的字符，生成三元组（大类、子类、字符）。'
         token = None
         while 1:
             try:
@@ -103,6 +137,8 @@ class Lexer:
                         token = self.parse_gbk(fp)
                     elif b[0] == 0xfe:
                         token = self.parse_symbol(fp, b[1] - 0x80)
+                    else:
+                        fp.seek(-2, 1)
                 elif c > '\x0f' or c.isspace():
                     token = self.parse_char(c)
                 if token:
@@ -114,6 +150,7 @@ class Lexer:
                 fp.seek(1-len(e.args[1]), 1)
 
     def fromstream(self, fp):
+        '从文本流进行识别'
         try:
             for token in self.lex(fp):
                 yield token
@@ -121,14 +158,17 @@ class Lexer:
             fp.close()
 
     def fromfile(self, filename):
+        '从本地文件进行识别'
         return self.fromstream(codecs.open(filename, 'r', encoding='gb18030'))
 
     def frombytes(self, data):
+        '从二进制字符串进行识别'
         info = codecs.lookup('gb18030')
         fp = codecs.StreamReaderWriter(
             BytesIO(data), info.streamreader, info.streamwriter)
         return self.fromstream(fp)
 
     def fromstring(self, text):
+        '从字符串进行识别'
         for c in text:
             yield self.parse_char(c)

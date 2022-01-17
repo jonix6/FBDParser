@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from ._chemical import ChemicalPatterns
 from ._columns import ColumnPatterns
@@ -32,6 +33,11 @@ class CommandPatterns(
         LayoutPatterns, MarkPatterns, MongolPatterns, NotePatterns,
         OtherPatterns, OutlinePatterns, PagingPatterns, ParagraphPatterns,
         SideBarPatterns, TablePatterns, TextPatterns, WhitespacePatterns):
+    '''### 书版排版注解解析器
+    
+    将注解按不同格式进行解析，以字典形式返回各注解参数。
+    
+    参数名称按语法规则标记为两个小写字母，可调用manual方法获取其含义。'''
 
     @classmethod
     def get(self, name, form):
@@ -53,6 +59,7 @@ class CommandPatterns(
 
     @classmethod
     def manual(self, name, form):
+        '各注解参数的详细说明: 缩写 -> 含义'
         if self.get(name, form):
             info = {}
             pat = getattr(self, name + '_' + form)
